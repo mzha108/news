@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="AccessJdbcDriver">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../Download/AccessJdbcDriver" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../Download/AccessJdbcDriver" recursive="false" />
+  </library>
+</component>
