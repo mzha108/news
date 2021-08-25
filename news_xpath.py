@@ -1,7 +1,7 @@
 '''
 Author       : Mu
 Date         : 2021-07-31 17:07:07
-LastEditTime : 2021-08-25 15:25:43
+LastEditTime : 2021-08-25 15:34:24
 LastEditors  : Mu
 Description  : 
 '''
@@ -96,7 +96,7 @@ def get_post_date_from_origin(news_url:str, headers:str):
     print(e)
 
   if response.status_code >= 200 and response.status_code < 300:
-    print()
+    print("test")
     pass
 
 
