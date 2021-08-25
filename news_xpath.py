@@ -1,11 +1,12 @@
 '''
 Author       : Mu
 Date         : 2021-07-31 17:07:07
-LastEditTime : 2021-08-25 15:34:24
+LastEditTime : 2021-08-25 22:31:36
 LastEditors  : Mu
 Description  : 
 '''
 
+from typing import Tuple
 import requests
 from lxml import html
 from fake_useragent import UserAgent
@@ -60,8 +61,8 @@ def get_entity(html_obj, headers):
           news_title = get_news_title(item)
           news_url = get_url('main_title')(item, headers)
           news_post_date = get_post_date_from_origin(news_url, headers)
-          news_content = get_news_content()
-          news_img_url = get_news_img_url()
+          # news_content = get_news_content()
+          # news_img_url = get_news_img_url()
 
         else:
           # not nzh or stuff
@@ -173,7 +174,7 @@ def get_news_sublist(item:html) -> list:
   sub_list = item.xpath(sub_list_path)
   return sub_list
   
-def get_news_publisher_and_time(item:html, flag:bool) -> tuple[list, list]:
+def get_news_publisher_and_time(item:html, flag:bool) -> Tuple[list, list]:
   '''
   description: 
   param {html} item
@@ -186,9 +187,9 @@ def get_news_publisher_and_time(item:html, flag:bool) -> tuple[list, list]:
   news_publisher = item.xpath(news_publisher_path)
   news_published_time = item.xpath(news_published_time_path)
   
-  return news_publisher, news_published_time
+  return (news_publisher, news_published_time)
 
-def get_news_publisher_and_time_in_sublist(item:html) -> tuple[list, list]:
+def get_news_publisher_and_time_in_sublist(item:html) -> Tuple[list, list]:
   '''
   description: 
   param {html} item
@@ -199,7 +200,7 @@ def get_news_publisher_and_time_in_sublist(item:html) -> tuple[list, list]:
   
   news_publisher = item.xpath(news_publisher_path)
   news_published_time = item.xpath(news_published_time_path)
-  return news_publisher, news_published_time
+  return (news_publisher, news_published_time)
   
 
 def is_nzh_or_stuff(news_publisher:list) -> bool:
