@@ -1,8 +1,11 @@
 '''
-Date: 2021-07-17 21:55:55
-LastEditors  : Mu
-LastEditTime : 2021-08-24 21:50:14
+@Author       : Mu
+@Date         : 2021-08-25 22:23:45
+@LastEditors  : Mu
+@LastEditTime : 2021-08-26 17:25:30
+@Description  : 
 '''
+
 
 from datetime import date, datetime, timezone
 import time
@@ -12,9 +15,9 @@ import mysql.connector
 
 def timer(func):
   '''
-  description: 
-  param {*} func
-  return {*}
+  @description: 
+  @param {*} func
+  @return {*}
   '''
   def wrapper(*args, **kw):
     a = time.time()
@@ -28,9 +31,9 @@ def timer(func):
 
 def time_diff(time_str:str):
   '''
-  description: 
-  param {str} time_str
-  return {*}
+  @description: 
+  @param {str} time_str
+  @return {*}
   '''
   time = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
   now = datetime.utcnow()
@@ -42,9 +45,9 @@ def time_diff(time_str:str):
 
 def save_to_db(entities):
   '''
-  description: 
-  param {*} entities
-  return {*}
+  @description: 
+  @param {*} entities
+  @return {*}
   '''
   # prepare data to be saved into DB
   data = []
