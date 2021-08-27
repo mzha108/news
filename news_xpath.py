@@ -2,7 +2,7 @@
 @Author       : Mu
 @Date         : 2021-08-25 22:23:45
 @LastEditors  : Mu
-@LastEditTime : 2021-08-26 20:42:50
+@LastEditTime : 2021-08-27 18:13:50
 @Description  : 
 '''
 
@@ -11,11 +11,13 @@ import requests
 from lxml import html
 from fake_useragent import UserAgent
 from utils import time_diff, timer, save_to_db
+import json
 
 # entity = {
 #         'news_title': str(news_title),
 #         'news_publisher': str(publisher),
 #         'post_date': str(post_date),
+#         'news_author': str
 #         'news_url': str(news_url),
 #         'img_url': article_imgs,
 #         'news_content': str(news_content)
@@ -29,7 +31,7 @@ def get_entity(html_obj, headers):
   @param {*} headers
   @return {*}
   '''
-  
+  entities = []
   root_xpath = '//*[@id="yDmH0d"]/c-wiz/div/div[2]/c-wiz/div/div[2]/div/main/c-wiz/div/div/main/div[1]/div' # news block 
   news_list = html_obj.xpath(root_xpath)
   print("========== Total number of news: ", len(news_list), "==========")
@@ -71,15 +73,65 @@ def get_entity(html_obj, headers):
               nzh_etree = html.etree
               nzh_obj = nzh_etree.HTML(response.text)
 
-              news_post_date = get_post_time_from_origin(nzh_obj)
-              news_content = get_news_content_from_origin(nzh_obj)
-              news_author = get_author_from_origin(nzh_obj)
+              news_post_date = get_post_time_from_origin(nzh_obj, 'nzh')
+              news_content = get_news_content_from_origin(nzh_obj, 'nzh')
+              news_author = get_author_from_origin(nzh_obj, 'nzh')
+              news_imgs = get_news_img_from_origin(nzh_obj, 'nzh')
               
+              print("======================================")
+              print("{0} news: ".format(news_publisher[0]))
+              print("news title: {0}".format(news_title[0]))
+              print("news author: {0}".format(news_author))
+              print("news post date: {0}".format(news_post_date))
+              print("news url: {0}".format(news_url))
+              print("news content: {0}".format(news_content))
+              print("news imgs: {0}".format(news_imgs))
+              print("======================================")
 
-              print("*****nzh*****")
+              entity = {
+                      'news_title': str(news_title[0]),
+                      'news_publisher': str(news_publisher[0]),
+                      'post_date': news_post_date,
+                      'news_author': news_author,
+                      'news_url': news_url,
+                      'img_url': news_imgs,
+                      'news_content': news_content
+                      }
+
+              entities.append(entity)
+              
             if "stuff" in news_publisher[0].lower():
               print("*****stuff*****")
+              stuff_etree = html.etree
+              stuff_obj = stuff_etree.HTML(response.text)
 
+              news_post_date = get_post_time_from_origin(stuff_obj, 'stuff')
+              news_content = get_news_content_from_origin(stuff_obj, 'stuff')
+              news_author = get_author_from_origin(stuff_obj, 'stuff')
+              news_imgs = get_news_img_from_origin(stuff_obj, 'stuff')
+              
+              print("======================================")
+              print("{0} news: ".format(news_publisher[0]))
+              print("news title: {0}".format(news_title[0]))
+              print("news author: {0}".format(news_author))
+              print("news post date: {0}".format(news_post_date))
+              print("news url: {0}".format(news_url))
+              print("news content: {0}".format(news_content))
+              print("news imgs: {0}".format(news_imgs))
+              print("======================================")
+
+              entity = {
+                      'news_title': str(news_title[0]),
+                      'news_publisher': str(news_publisher[0]),
+                      'post_date': news_post_date,
+                      'news_author': news_author,
+                      'news_url': news_url,
+                      'img_url': news_imgs,
+                      'news_content': news_content
+                      }
+
+              entities.append(entity)
+            
         else:
           # not nzh or stuff
           print('not found in main area. Finding in sublist...')
@@ -104,51 +156,85 @@ def get_entity(html_obj, headers):
   else:
     # no news found
     print("No news found! Please check root xpath.")
+  return entities
 
 
-def get_post_time_from_origin(nzh_obj:html) -> str:
+def get_post_time_from_origin(html_obj:html, flag:str) -> str:
   '''
   @description: 
-  @param {html} nzh_obj
+  @param {html} html_obj
   @return {*}
   '''
-  
-  post_time_xpath = '//*[@id="main"]/article/section[1]/header/div[1]/div/time/@datetime'
+  if flag == 'nzh':
+    post_time_xpath = '//*[@id="main"]/article/section[1]/header/div[1]/div/time/@datetime'
   # news_author_xpath = '//*[@id="main"]/article/section[1]/section[1]/div[1]/div/div/a/text()'
   # news_content_xpath = '//*[@id="main"]/article/section[1]/section[2]/p/text()'
+  if flag == 'stuff':
+    post_time_xpath = ''
 
-  news_post_time_from_origin = nzh_obj.xpath(post_time_xpath)
+  news_post_time_from_origin = html_obj.xpath(post_time_xpath)
   return news_post_time_from_origin[0]
 
-def get_author_from_origin(nzh_obj:html) -> str:
+def get_author_from_origin(html_obj:html, flag:str) -> str:
   '''
   @description: 
-  @param {html} nzh_obj
+  @param {html} html_obj
   @return {*}
   '''
   
-  # post_time_xpath = '//*[@id="main"]/article/section[1]/header/div[1]/div/time/@datetime'
-  news_author_xpath = '//*[@id="main"]/article/section[1]/section[1]/div[1]/div/div/a/text()'
-  news_author_xpath_2 = '//*[@id="main"]/article/section[1]/section[1]/div[1]/div/div[1]/text()'
+  if flag == 'nzh':
+    news_author_primary_xpath = '//*[@id="main"]/article/section[1]/section[1]/div[1]/div/div/a/text()'
+    news_autho_alternativer_xpath = '//*[@id="main"]/article/section[1]/section[1]/div[1]/div/div[1]/text()'
+  if flag == 'stuff':
+    news_author_primary_xpath = ''
+    news_autho_alternativer_xpath = ''
   # news_content_xpath = '//*[@id="main"]/article/section[1]/section[2]/p/text()'
 
-  news_author = nzh_obj.xpath(news_author_xpath)
+  news_author = html_obj.xpath(news_author_primary_xpath)
   if len(news_author) == 0:
-    news_author = nzh_obj.xpath(news_author_xpath_2)
+    news_author = html_obj.xpath(news_autho_alternativer_xpath)
   return news_author[0]
 
-
-def get_news_content_from_origin(nzh_obj:html) -> list:
+def get_news_content_from_origin(html_obj:html, flag:str) -> str:
   '''
   @description: 
-  @param {html} nzh_obj
+  @param {html} html_obj
   @return {*}
   '''
+  news_content = ''
+  if flag == 'nzh':
+    news_content_xpath = '//*[@id="main"]/article/section[1]/section[2]/p/text()'
+  if flag == 'stuff':
+    news_content_xpath = ''
+  
+  news_content_from_origin = html_obj.xpath(news_content_xpath)
+  for content in news_content_from_origin:
+    news_content += content+'<EOP>'.strip()
+    
+  return news_content
 
-  news_content_xpath = '//*[@id="main"]/article/section[1]/section[2]/p/text()'
-  news_content_from_origin = nzh_obj.xpath(news_content_xpath)
-  return news_content_from_origin
+def get_news_img_from_origin(html_obj:html, flag:str) -> dict:
+  '''
+  @description: 
+  @param {html} html_obj
+  @return {*}
+  '''
+  imgs_list = []
+  if flag == 'nzh':
+    imgs_figure_xpath = '//*[@id="main"]/article/section[1]/section[2]//div[@class="article-media"]/figure{0}'
+  if flag == 'stuff':
+    imgs_figure_xpath = ''
+    
+  imgs = html_obj.xpath(imgs_figure_xpath.format(''))
 
+  for i in range(len(imgs)):
+    imgs_title = imgs[i].xpath('figcaption/text()')
+    img = str(imgs[i].xpath('img/@data-srcset')).split(',')[-1].split(' ')[0]
+    if not imgs_title:
+      imgs_list.append({'title': 'no-title', 'img': img})
+    else:
+      imgs_list.append({'title': imgs_title, 'img': img})
+  return imgs_list
 
 def get_news_title_from_main(item:html) -> list:
   '''
@@ -276,9 +362,9 @@ def is_old(news_published_utc_time):
   
 @timer
 def main():
-  # ua = UserAgent(verify_ssl=False)
-  # headers = ua.random
-  headers = "header = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}"
+  ua = UserAgent(verify_ssl=False)
+  headers = ua.random
+  # headers = "header = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}"
   url = 'https://news.google.com/topics/CAAqIggKIhxDQkFTRHdvSkwyMHZNR04wZDE5aUVnSmxiaWdBUAE?hl=en-NZ&gl=NZ&ceid=NZ%3Aen'
   try:
     response = requests.get(url, headers)
@@ -289,7 +375,10 @@ def main():
     etree = html.etree
     html_obj = etree.HTML(response.text)
 
-    get_entity(html_obj, headers)
+    entity = get_entity(html_obj, headers)
+    
+    with open('test.json', 'w', encoding='utf-8') as f:
+      json.dump(entity, f, ensure_ascii=False)
 
     # try:
     #   get_entity(html_obj, headers)
